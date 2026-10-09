@@ -1,0 +1,11 @@
+{
+  "name": "英単語トレーナー - ターゲット1400",
+  "short_name": "単語トレーナー",
+  "description": "高校生向けの英単語週間計画・復習記録アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#172554",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

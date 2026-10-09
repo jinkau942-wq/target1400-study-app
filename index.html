@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#172554">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="単語トレーナー">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>英単語トレーナー</title>
+<style>
+:root{--navy:#172554;--blue:#2563eb;--pale:#eff6ff;--bg:#f5f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--green:#15803d;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+header{background:var(--navy);color:white;padding:22px 18px 20px;border-radius:0 0 24px 24px}
+header .eyebrow{font-size:12px;opacity:.8;letter-spacing:.08em}h1{font-size:24px;margin:6px 0}header p{margin:4px 0 0;font-size:13px;opacity:.85}
+main{max-width:700px;margin:0 auto;padding:14px}
+.card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 3px 12px #0f172a08}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted);font-size:13px}.big{font-size:28px;font-weight:800}.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:10px 0 6px}.bar{height:100%;background:var(--blue);width:0;transition:width .2s}
+h2{font-size:17px;margin:0 0 12px}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.day{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 2px;text-align:center;font-weight:700;color:var(--ink)}.day.active{background:var(--navy);color:white;border-color:var(--navy)}.day.done:after{content:" ✓";color:#22c55e}.day.active.done:after{color:#86efac}
+.task{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.task:last-child{border-bottom:0}.task input{width:20px;height:20px;accent-color:var(--blue);flex-shrink:0;margin-top:0}.task.done label{text-decoration:line-through;color:var(--muted)}
+button,.btn{border:0;border-radius:12px;background:var(--blue);color:white;padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer}.secondary{background:#eef2ff;color:#1e3a8a}.ghost{background:#f1f5f9;color:#334155}.danger{background:#fee2e2;color:#991b1b}.full{width:100%}button:disabled{opacity:.35}
+input[type=text],input[type=number],textarea,select{width:100%;border:1px solid #cbd5e1;border-radius:11px;padding:11px;font:inherit;background:white;color:var(--ink)}textarea{min-height:76px;resize:vertical}.field{margin:10px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.btnrow{display:flex;gap:8px}.btnrow>*{flex:1}
+.word{font-size:25px;font-weight:800;text-align:center;padding:18px 4px 6px}.meaning{font-size:20px;text-align:center;min-height:32px;margin:8px}.pill{display:inline-block;background:var(--pale);color:#1d4ed8;border-radius:99px;padding:5px 9px;font-size:12px;font-weight:700}
+nav{position:fixed;bottom:0;left:0;right:0;background:#ffffffed;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:5}nav button{background:transparent;color:var(--muted);padding:7px 2px;font-size:11px}nav button span{display:block;font-size:20px;margin-bottom:3px}nav button.active{color:var(--blue)}
+.view{display:none}.view.active{display:block}.small{font-size:12px}.empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 0}
+.timer{font-size:40px;font-weight:800;text-align:center;margin:10px}.notice{background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:12px;padding:11px;font-size:12px;line-height:1.6}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">TARGET 1400 · STUDY PLANNER</div><h1>英単語トレーナー</h1><p>毎日の積み重ねを、見える記録に。</p></header>
+<main>
+<section id="home" class="view active">
+  <div class="card">
+    <div class="row"><div><div class="muted">今週のタスク達成率</div><div class="big" id="percent">0%</div></div><div style="text-align:right"><div class="muted">連続学習日数</div><div class="big" id="streak">0日</div></div></div>
+    <div class="progress"><div class="bar" id="progressBar"></div></div><div class="muted" id="progressText">0 / 21 タスク完了</div>
+  </div>
+  <div class="card"><h2>今日の学習</h2><div class="row"><div><div id="todayTitle" style="font-weight:800;font-size:18px">月曜日</div><div class="muted" id="todayRange">単語 1〜30番</div></div><button id="goToday">今日の内容へ</button></div></div>
+  <div class="card"><h2>週間カレンダー</h2><div class="days" id="dayButtons"></div><div class="muted" style="margin-top:10px">曜日を選ぶと、その日のタスクを編集できるよ。</div></div>
+  <div class="card"><h2>学習メモ</h2><textarea id="memo" placeholder="今日覚えにくかった単語や気づきをメモ…"></textarea><button class="full" style="margin-top:8px" id="saveMemo">メモを保存</button></div>
+</section>
+<section id="plan" class="view">
+  <div class="card"><div class="row"><div><div class="muted">選択中</div><h2 id="planDay" style="margin:4px 0">月曜日</h2></div><span class="pill" id="planRange">1〜30番</span></div>
+    <div class="days" id="planDayButtons"></div><div id="taskList" style="margin-top:12px"></div>
+    <div class="btnrow" style="margin-top:12px"><button class="secondary" id="prevDay">← 前の日</button><button id="nextDay">次の日 →</button></div>
+  </div>
+  <div class="card"><h2>学習時間</h2><div class="field"><label for="minutes">今日の目標（分）</label><select id="minutes"><option value="30">30分</option><option value="40" selected>40分</option><option value="50">50分</option><option value="60">60分</option></select></div>
+  <div class="timer" id="timer">40:00</div><div class="btnrow"><button id="startTimer">スタート</button><button class="secondary" id="resetTimer">リセット</button></div><p class="muted">タイマーは画面を開いている間に動くシンプルな仕様です。</p></div>
+</section>
+<section id="quiz" class="view">
+  <div class="card"><h2>自分の単語を登録してクイズ</h2><p class="muted">ターゲット1400の単語・意味を自分で入力して使うクイズです。教材の単語リストは著作権のためアプリには収録していません。</p>
+    <div class="field"><label for="wordInput">英単語</label><input id="wordInput" type="text" placeholder="例：important"></div>
+    <div class="field"><label for="meaningInput">日本語の意味</label><input id="meaningInput" type="text" placeholder="例：重要な"></div>
+    <button class="full" id="addWord">単語を登録</button>
+  </div>
+  <div class="card"><div class="row"><h2>単語クイズ</h2><span class="pill" id="wordCount">0語登録</span></div><div class="word" id="quizWord">単語を登録してね</div><div class="meaning" id="quizMeaning"></div><div class="btnrow"><button class="secondary" id="showMeaning">意味を見る</button><button id="nextWord">次の単語</button></div><div class="btnrow" style="margin-top:8px"><button class="secondary" id="markKnown">覚えた</button><button class="danger" id="markWeak">要復習</button></div><p class="muted" id="quizStats"></p></div>
+  <div class="card"><h2>登録した単語</h2><div id="wordList" class="small"></div></div>
+</section>
+<section id="stats" class="view">
+  <div class="card"><h2>学習レポート</h2><div class="row"><div><div class="muted">完了タスク</div><div class="big" id="statTasks">0</div></div><div><div class="muted">登録単語</div><div class="big" id="statWords">0</div></div><div><div class="muted">要復習</div><div class="big" id="statWeak">0</div></div></div></div>
+  <div class="card"><h2>今週の振り返り</h2><div id="dayReport"></div></div>
+  <div class="card"><h2>データ管理</h2><p class="muted">記録はこの端末のブラウザ内に保存されます。ブラウザのデータを消すと記録も消えるので、必要ならバックアップを保存してね。</p><div class="btnrow"><button id="exportData" class="secondary">バックアップ保存</button><button id="importButton" class="secondary">復元する</button></div><input id="importFile" type="file" accept="application/json" hidden><button id="resetAll" class="danger full" style="margin-top:10px">すべての記録を削除</button></div>
+</section>
+</main>
+<nav>
+<button class="active" data-view="home"><span>⌂</span>ホーム</button>
+<button data-view="plan"><span>✓</span>学習計画</button>
+<button data-view="quiz"><span>文</span>単語クイズ</button>
+<button data-view="stats"><span>▥</span>記録</button>
+</nav>
+<script>
+const DAYS=[
+ {name:"月曜日",range:"1〜30番",tasks:["新しい単語30語を覚える","意味を隠して確認テスト","間違えた単語を復習"]},
+ {name:"火曜日",range:"31〜60番",tasks:["月曜日の単語を復習","新しい単語30語を覚える","確認テスト"]},
+ {name:"水曜日",range:"61〜90番",tasks:["火曜日の単語を復習","新しい単語30語を覚える","確認テスト"]},
+ {name:"木曜日",range:"91〜120番",tasks:["1〜90番の苦手語を復習","新しい単語30語を覚える","確認テスト"]},
+ {name:"金曜日",range:"121〜150番",tasks:["前日までの単語を復習","新しい単語30語を覚える","確認テスト"]},
+ {name:"土曜日",range:"151〜180番（余裕があれば）",tasks:["1〜150番の復習テスト","余裕があれば新しい30語","間違えた単語を復習"]},
+ {name:"日曜日",range:"総復習",tasks:["1週間の苦手単語を復習","間違えた単語を再テスト","来週の範囲を確認"]}
+];
+const KEY="target1400StudyApp_v1";
+let data=loadData(),selectedDay=0,timerInterval=null,secondsLeft=Number(data.minutes||40)*60,currentWord=null;
+function loadData(){try{return JSON.parse(localStorage.getItem(KEY))||{checks:{},memo:{},words:[],minutes:40,quiz:{known:0,weak:0}}}catch(e){return {checks:{},memo:{},words:[],minutes:40,quiz:{known:0,weak:0}}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function taskKey(d,t){return d+"-"+t}
+function dayDone(d){return DAYS[d].tasks.every((_,i)=>!!data.checks[taskKey(d,i)])}
+function renderDays(){["dayButtons","planDayButtons"].forEach(id=>{const el=document.getElementById(id);el.innerHTML="";DAYS.forEach((d,i)=>{const b=document.createElement("button");b.className="day"+(selectedDay===i?" active":"")+(dayDone(i)?" done":"");b.textContent="月火水木金土日"[i];b.onclick=()=>{selectedDay=i;renderAll()};el.appendChild(b)})})}
+function renderPlan(){const d=DAYS[selectedDay];document.getElementById("planDay").textContent=d.name;document.getElementById("planRange").textContent=d.range;const list=document.getElementById("taskList");list.innerHTML="";d.tasks.forEach((t,i)=>{const row=document.createElement("div");row.className="task"+(data.checks[taskKey(selectedDay,i)]?" done":"");const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!data.checks[taskKey(selectedDay,i)];cb.onchange=()=>{data.checks[taskKey(selectedDay,i)]=cb.checked;save()};const label=document.createElement("label");label.textContent=t;row.append(cb,label);list.appendChild(row)});document.getElementById("prevDay").disabled=selectedDay===0;document.getElementById("nextDay").disabled=selectedDay===6}
+function renderHome(){let done=0,total=0;DAYS.forEach((d,i)=>d.tasks.forEach((_,j)=>{total++;if(data.checks[taskKey(i,j)])done++}));document.getElementById("percent").textContent=Math.round(done/total*100)+"%";document.getElementById("progressBar").style.width=(done/total*100)+"%";document.getElementById("progressText").textContent=`${done} / ${total} タスク完了`;let streak=0;for(let i=6;i>=0;i--){if(dayDone(i))streak++;else if(streak>0)break}document.getElementById("streak").textContent=streak+"日";document.getElementById("todayTitle").textContent=DAYS[selectedDay].name;document.getElementById("todayRange").textContent="単語 "+DAYS[selectedDay].range;document.getElementById("memo").value=data.memo[selectedDay]||"";renderDays()}
+function renderWords(){document.getElementById("wordCount").textContent=data.words.length+"語登録";document.getElementById("statWords").textContent=data.words.length;document.getElementById("statWeak").textContent=data.words.filter(w=>w.weak).length;document.getElementById("quizStats").textContent=`覚えた：${data.quiz.known||0}回 / 要復習：${data.quiz.weak||0}回`;const list=document.getElementById("wordList");list.innerHTML="";if(!data.words.length){list.innerHTML='<div class="empty">まだ単語が登録されていません。</div>';return}data.words.forEach((w,i)=>{const r=document.createElement("div");r.className="task";const txt=document.createElement("div");txt.style.flex="1";txt.innerHTML="";const strong=document.createElement("strong");strong.textContent=w.word;const br=document.createElement("br");const meaning=document.createElement("span");meaning.textContent=w.meaning+" "+(w.weak?"・要復習":"");meaning.className="muted";txt.append(strong,br,meaning);const del=document.createElement("button");del.className="danger";del.textContent="削除";del.onclick=()=>{data.words.splice(i,1);save();nextQuiz()};r.append(txt,del);list.appendChild(r)})}
+function nextQuiz(){if(!data.words.length){currentWord=null;document.getElementById("quizWord").textContent="単語を登録してね";document.getElementById("quizMeaning").textContent="";return}currentWord=data.words[Math.floor(Math.random()*data.words.length)];document.getElementById("quizWord").textContent=currentWord.word;document.getElementById("quizMeaning").textContent="";document.getElementById("showMeaning").textContent="意味を見る"}
+function renderStats(){let done=0;DAYS.forEach((d,i)=>d.tasks.forEach((_,j)=>{if(data.checks[taskKey(i,j)])done++}));document.getElementById("statTasks").textContent=done;const r=document.getElementById("dayReport");r.innerHTML="";DAYS.forEach((d,i)=>{const p=document.createElement("p");p.style.margin="9px 0";p.textContent=d.name+"： "+d.tasks.filter((_,j)=>data.checks[taskKey(i,j)]).length+"/"+d.tasks.length+" タスク";r.appendChild(p)})}
+function renderAll(){renderHome();renderPlan();renderWords();renderStats();document.getElementById("minutes").value=String(data.minutes||40)}
+function showView(name){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===name));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===name))}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+document.getElementById("goToday").onclick=()=>showView("plan");
+document.getElementById("prevDay").onclick=()=>{selectedDay=Math.max(0,selectedDay-1);renderAll()};
+document.getElementById("nextDay").onclick=()=>{selectedDay=Math.min(6,selectedDay+1);renderAll()};
+document.getElementById("saveMemo").onclick=()=>{data.memo[selectedDay]=document.getElementById("memo").value;save();alert("メモを保存したよ！")};
+document.getElementById("minutes").onchange=e=>{data.minutes=Number(e.target.value);secondsLeft=data.minutes*60;updateTimer();save()};
+function updateTimer(){document.getElementById("timer").textContent=String(Math.floor(secondsLeft/60)).padStart(2,"0")+":"+String(secondsLeft%60).padStart(2,"0")}
+document.getElementById("startTimer").onclick=()=>{if(timerInterval){clearInterval(timerInterval);timerInterval=null;document.getElementById("startTimer").textContent="再開";return}document.getElementById("startTimer").textContent="一時停止";timerInterval=setInterval(()=>{secondsLeft--;updateTimer();if(secondsLeft<=0){clearInterval(timerInterval);timerInterval=null;document.getElementById("startTimer").textContent="スタート";alert("学習時間終了！おつかれさま！")}},1000)};
+document.getElementById("resetTimer").onclick=()=>{clearInterval(timerInterval);timerInterval=null;secondsLeft=Number(data.minutes||40)*60;document.getElementById("startTimer").textContent="スタート";updateTimer()};
+document.getElementById("addWord").onclick=()=>{const word=document.getElementById("wordInput").value.trim(),meaning=document.getElementById("meaningInput").value.trim();if(!word||!meaning){alert("英単語と意味の両方を入力してね");return}data.words.push({word,meaning,weak:false});document.getElementById("wordInput").value="";document.getElementById("meaningInput").value="";save();nextQuiz();alert("単語を登録したよ！")};
+document.getElementById("showMeaning").onclick=()=>{if(currentWord){document.getElementById("quizMeaning").textContent=currentWord.meaning;document.getElementById("showMeaning").textContent="意味を表示中"}};
+document.getElementById("nextWord").onclick=nextQuiz;
+document.getElementById("markKnown").onclick=()=>{if(!currentWord)return;currentWord.weak=false;data.quiz.known=(data.quiz.known||0)+1;save();nextQuiz()};
+document.getElementById("markWeak").onclick=()=>{if(!currentWord)return;currentWord.weak=true;data.quiz.weak=(data.quiz.weak||0)+1;save();nextQuiz()};
+document.getElementById("exportData").onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="target1400-backup.json";a.click();URL.revokeObjectURL(a.href)};
+document.getElementById("importButton").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.checks||!Array.isArray(x.words))throw Error();data=x;save();nextQuiz();alert("バックアップを復元したよ！")}catch(err){alert("このファイルは読み込めなかったよ")}};
+document.getElementById("resetAll").onclick=()=>{if(confirm("学習記録・単語・メモをすべて削除する？この操作は元に戻せません。")){data={checks:{},memo:{},words:[],minutes:40,quiz:{known:0,weak:0}};selectedDay=0;save();nextQuiz()}};
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
+secondsLeft=Number(data.minutes||40)*60;updateTimer();renderAll();nextQuiz();
+</script>
+</body></html>
